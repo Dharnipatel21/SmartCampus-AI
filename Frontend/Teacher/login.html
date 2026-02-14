@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Login – SmartCampus AI</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#764ba2,#667eea);min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;border-radius:16px;padding:40px 36px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .logo{text-align:center;margin-bottom:28px}
+  .logo .icon{font-size:50px}
+  .logo h2{color:#764ba2;margin-top:8px;font-size:24px}
+  .logo p{color:#888;font-size:14px}
+  label{display:block;font-size:14px;font-weight:600;color:#444;margin-bottom:6px}
+  input{width:100%;padding:11px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;outline:none;transition:.2s}
+  input:focus{border-color:#764ba2}
+  .grp{margin-bottom:18px}
+  .btn{width:100%;padding:13px;background:linear-gradient(135deg,#764ba2,#667eea);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;transition:.2s}
+  .btn:hover{opacity:.88}
+  .err{background:#fee;color:#c00;padding:10px 14px;border-radius:8px;font-size:14px;margin-bottom:14px;display:none}
+  .demo{background:#f5f0ff;border-radius:8px;padding:14px;margin-top:20px;font-size:13px;color:#555}
+  .demo b{color:#764ba2}
+  .back{text-align:center;margin-top:16px;font-size:14px}
+  .back a{color:#764ba2;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="icon">👨‍🏫</div>
+    <h2>Teacher Login</h2>
+    <p>SmartCampus AI</p>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <form id="form">
+    <div class="grp">
+      <label>Teacher ID</label>
+      <input id="tid" type="text" placeholder="e.g. T001" required>
+    </div>
+    <div class="grp">
+      <label>Password</label>
+      <input id="pwd" type="password" placeholder="Enter your password" required>
+    </div>
+    <button class="btn" type="submit">Login</button>
+  </form>
+
+  <div class="demo">
+    <b>Demo Credentials</b><br>
+    Teacher ID: <b>T001</b> (HOD CSE) &nbsp;|&nbsp; <b>T002</b> (Placement) &nbsp;|&nbsp; <b>T003</b> (Warden)<br>
+    Password: <b>teacher123</b>
+  </div>
+
+  <div class="back"><a href="../index.html">← Back to Home</a></div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+document.getElementById('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const errDiv = document.getElementById('err');
+  errDiv.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/teacher/login`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        teacher_id: document.getElementById('tid').value.trim(),
+        password:   document.getElementById('pwd').value.trim()
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      localStorage.setItem('teacher', JSON.stringify(data.teacher));
+      localStorage.setItem('teacherRoles', JSON.stringify(data.roles));
+      localStorage.setItem('teacherStatus', JSON.stringify(data.status));
+      window.location.href = 'dashboard.html';
+    } else {
+      errDiv.textContent = data.message || 'Invalid credentials. Try T001 / teacher123';
+      errDiv.style.display = 'block';
+    }
+  } catch {
+    errDiv.textContent = '❌ Cannot connect to server. Make sure backend is running: python app.py';
+    errDiv.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>
