@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Dashboard – SmartCampus AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f4f6fb;color:#333}
+nav{background:linear-gradient(135deg,#764ba2,#667eea);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+nav h1{font-size:20px}
+.nav-right{display:flex;align-items:center;gap:14px;font-size:14px}
+.btn-logout{background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 16px;border-radius:6px;cursor:pointer}
+.tabs{display:flex;gap:4px;padding:16px 24px 0;overflow-x:auto;background:#fff;border-bottom:2px solid #e8d5f5}
+.tab{padding:10px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:#888;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
+.tab.active{color:#764ba2;border-bottom-color:#764ba2;background:#f5f0ff;border-radius:6px 6px 0 0}
+.content{padding:24px;max-width:1200px;margin:0 auto}
+.section{display:none}.section.active{display:block}
+h2{font-size:20px;color:#444;margin-bottom:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center}
+.card .num{font-size:32px;font-weight:700;color:#764ba2;margin-bottom:4px}
+.card .lbl{font-size:13px;color:#888}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
+.badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-ok{background:#e8f5e9;color:#2e7d32}.badge-warn{background:#fff3e0;color:#e65100}
+.badge-bad{background:#fce4ec;color:#c62828}.badge-pend{background:#e3f2fd;color:#1565c0}
+.role-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.role-badge{background:#764ba2;color:#fff;padding:5px 14px;border-radius:20px;font-size:12px}
+
+/* OUTPASS REQUEST CARDS */
+.op-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);border-left:4px solid #764ba2}
+.op-card.stage-me{border-left-color:#f57c00}
+.op-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.op-student{font-size:16px;font-weight:700;color:#333}
+.op-reg{font-size:12px;color:#888;margin-top:2px}
+.op-details{font-size:13px;color:#555;margin-bottom:12px;line-height:1.8}
+
+/* ATTENDANCE MINI TABLE inside outpass card */
+.att-mini{margin:12px 0;background:#f9f9f9;border-radius:8px;overflow:hidden}
+.att-mini-title{background:#764ba2;color:#fff;padding:7px 12px;font-size:12px;font-weight:700}
+.att-mini table{width:100%;border-collapse:collapse}
+.att-mini td{padding:6px 10px;font-size:12px;border-bottom:1px solid #f0f0f0}
+.att-mini tr:last-child td{border:none}
+.att-low{color:#e53935;font-weight:700}
+.att-safe{color:#2e7d32}
+
+/* STAGE TRACKER */
+.stage-tracker{display:flex;gap:0;margin:12px 0;overflow-x:auto}
+.stage-box{flex:1;min-width:110px;text-align:center;padding:8px 6px;font-size:11px;border:1px solid #e0e0e0;background:#f5f5f5;color:#999}
+.stage-box:first-child{border-radius:8px 0 0 8px}
+.stage-box:last-child{border-radius:0 8px 8px 0}
+.stage-box.done{background:#e8f5e9;color:#2e7d32;border-color:#4caf50;font-weight:700}
+.stage-box.current{background:#e3f2fd;color:#1565c0;border-color:#2196f3;font-weight:700}
+.stage-box.rejected{background:#fce4ec;color:#c62828;border-color:#f44336}
+.stage-arrow{align-self:center;color:#bbb;font-size:16px;padding:0 2px}
+
+/* ACTION BUTTONS */
+.action-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.btn-approve{padding:9px 20px;background:#4caf50;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px}
+.btn-reject{padding:9px 20px;background:#f44336;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px}
+.btn-approve:hover{background:#43a047}.btn-reject:hover{background:#e53935}
+.stage-label{font-size:13px;color:#764ba2;font-weight:700;padding:6px 14px;background:#f5f0ff;border-radius:8px}
+.not-my-stage{font-size:13px;color:#999;font-style:italic}
+
+/* LOCATION FORM */
+.form-box{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.07);max-width:520px}
+.form-box h3{margin-bottom:18px;color:#764ba2}
+.grp{margin-bottom:14px}
+.grp label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#555}
+.grp input,.grp select{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;transition:.2s}
+.grp input:focus,.grp select:focus{border-color:#764ba2}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-submit{padding:11px 28px;background:linear-gradient(135deg,#764ba2,#667eea);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
+.msg{padding:10px 14px;border-radius:8px;font-size:14px;margin-top:12px;display:none}
+.msg.ok{background:#e8f5e9;color:#2e7d32}.msg.err{background:#fce4ec;color:#c62828}
+
+/* TICKETS TABLE */
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+th{background:#764ba2;color:#fff;padding:12px 14px;text-align:left;font-size:14px}
+td{padding:11px 14px;border-bottom:1px solid #f0f0f0;font-size:14px}
+tr:last-child td{border:none}
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>👨‍🏫 Teacher Dashboard</h1>
+  <div class="nav-right">
+    <span id="navName">Teacher</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('home',this)">🏠 Home</button>
+  <button class="tab" onclick="show('location',this)">📍 Update Location</button>
+  <button class="tab" onclick="show('outpass',this)">🚪 Outpass Approvals</button>
+  <button class="tab" onclick="show('onduty',this)">📋 On-Duty</button>
+  <button class="tab" onclick="show('tickets',this)">🎫 Help Desk</button>
+</div>
+
+<div class="content">
+
+<!-- HOME -->
+<div id="home" class="section active">
+  <h2>Welcome, <span id="welcomeName">Teacher</span>! 👋</h2>
+  <div class="tip" style="background:#f5f0ff;color:#764ba2">
+    <b>Teacher ID:</b> <span id="tId">—</span> &nbsp;|&nbsp;
+    <b>Dept:</b> <span id="tDept">—</span> &nbsp;|&nbsp;
+    <b>Office:</b> <span id="tOffice">—</span>
+    <div class="role-badges" id="roleBadges"></div>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="num" id="pendOutpass">—</div><div class="lbl">Pending Outpass</div></div>
+    <div class="card"><div class="num" id="pendOnduty">—</div><div class="lbl">Pending On-Duty</div></div>
+    <div class="card"><div class="num" id="openTickets">—</div><div class="lbl">Open Tickets</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+    <tbody id="profileTable"></tbody>
+  </table>
+</div>
+
+<!-- UPDATE LOCATION -->
+<div id="location" class="section">
+  <h2>📍 Update Your Location &amp; Status</h2>
+  <div class="form-box">
+    <h3>Set Current Status</h3>
+    <div class="grp">
+      <label>Status</label>
+      <select id="locStatus">
+        <option>In Office</option><option>In Class</option>
+        <option>In Meeting</option><option>On Leave</option>
+        <option>Available</option><option>Busy</option>
+      </select>
+    </div>
+    <div class="grp"><label>Location / Room</label><input id="locRoom" type="text" placeholder="e.g. CSE-101, CSE Lab 3"></div>
+    <div class="row2">
+      <div class="grp"><label>Available From</label><input id="locFrom" type="time"></div>
+      <div class="grp"><label>Available To</label><input id="locTo" type="time"></div>
+    </div>
+    <button class="btn-submit" onclick="updateLocation()">Update Status</button>
+    <div class="msg" id="locMsg"></div>
+  </div>
+</div>
+
+<!-- OUTPASS APPROVALS — 4-Stage -->
+<div id="outpass" class="section">
+  <h2>🚪 Outpass Approvals</h2>
+  <div class="tip" style="background:#e3f2fd;color:#1565c0">
+    ℹ️ Outpass flow: <b>Faculty Advisor → Hostel Coordinator → HOD → Hostel Warden</b><br>
+    You will only see the <b>Approve / Reject</b> buttons for <b>your stage</b>. Other stages show as greyed out.
+    <br>Student's attendance is shown so you can make an informed decision.
+  </div>
+  <div id="opContainer"><p style="color:#999;text-align:center;padding:30px">Loading outpass requests...</p></div>
+</div>
+
+<!-- ON-DUTY -->
+<div id="onduty" class="section">
+  <h2>📋 Pending On-Duty Requests</h2>
+  <table>
+    <thead><tr><th>Student</th><th>Event</th><th>Date</th><th>Description</th><th>Action</th></tr></thead>
+    <tbody id="odTable"></tbody>
+  </table>
+</div>
+
+<!-- TICKETS -->
+<div id="tickets" class="section">
+  <h2>🎫 Help Desk Tickets</h2>
+  <table>
+    <thead><tr><th>Student</th><th>Category</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody id="ticketTable"></tbody>
+  </table>
+</div>
+
+</div><!-- /content -->
+
+<script>
+const API = 'http://localhost:5000/api';
+let teacher = null;
+let myRoles  = [];
+const loaded = {};
+
+// ── INIT ──────────────────────────────────────────────────────────────
+window.onload = () => {
+  const stored = localStorage.getItem('teacher');
+  if (!stored) { window.location.href = 'login.html'; return; }
+  teacher = JSON.parse(stored);
+  myRoles = JSON.parse(localStorage.getItem('teacherRoles') || '[]');
+
+  document.getElementById('navName').textContent    = teacher.name;
+  document.getElementById('welcomeName').textContent = teacher.name;
+  document.getElementById('tId').textContent         = teacher.teacher_id;
+  document.getElementById('tDept').textContent       = teacher.department || '—';
+  document.getElementById('tOffice').textContent     = teacher.office_room || '—';
+
+  // Role badges
+  const badges = document.getElementById('roleBadges');
+  myRoles.forEach(r => {
+    const b = document.createElement('span');
+    b.className = 'role-badge';
+    b.textContent = r.role_name;
+    badges.appendChild(b);
+  });
+
+  // Profile table
+  const fields = [
+    ['Name',teacher.name],['Teacher ID',teacher.teacher_id],
+    ['Department',teacher.department],['Designation',teacher.designation],
+    ['Office Room',teacher.office_room],['Email',teacher.email||'—']
+  ];
+  document.getElementById('profileTable').innerHTML =
+    fields.map(([k,v])=>`<tr><td style="padding:10px 14px"><b>${k}</b></td><td style="padding:10px 14px">${v||'—'}</td></tr>`).join('');
+
+  loadCounts();
+
+  // Auto-load outpass since it's the key feature
+  loadOutpass();
+};
+
+function logout(){
+  localStorage.removeItem('teacher');
+  localStorage.removeItem('teacherRoles');
+  localStorage.removeItem('teacherStatus');
+  window.location.href = 'login.html';
+}
+
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if (!loaded[id]) {
+    loaded[id] = true;
+    if (id==='onduty')  loadOnduty();
+    if (id==='tickets') loadTickets();
+  }
+}
+
+async function loadCounts() {
+  try {
+    const [op, od, tk] = await Promise.all([
+      fetch(`${API}/teacher/outpass/pending`).then(r=>r.json()),
+      fetch(`${API}/teacher/onduty/pending`).then(r=>r.json()),
+      fetch(`${API}/teacher/helpdesk/all`).then(r=>r.json())
+    ]);
+    document.getElementById('pendOutpass').textContent = op.length;
+    document.getElementById('pendOnduty').textContent  = od.length;
+    document.getElementById('openTickets').textContent = tk.filter(t=>t.status==='Open').length;
+  } catch(e){ console.error(e); }
+}
+
+// ── DETERMINE TEACHER'S STAGE ROLE ─────────────────────────────────────
+// Returns which outpass stage this teacher can act on
+function getMyStageRole() {
+  const roleTypes = myRoles.map(r => r.role_type);
+  if (roleTypes.includes('WARDEN'))       return 'warden';
+  if (roleTypes.includes('HOD'))          return 'hod';
+  if (roleTypes.includes('HOSTEL_COORD')) return 'hostel';
+  if (roleTypes.includes('FACULTY_ADVISOR')) return 'faculty';
+  // Default: faculty advisor (any teacher can act as faculty advisor)
+  return 'faculty';
+}
+
+// ── OUTPASS — 4-STAGE VIEW ─────────────────────────────────────────────
+async function loadOutpass() {
+  const container = document.getElementById('opContainer');
+  try {
+    const res  = await fetch(`${API}/teacher/outpass/pending`);
+    const rows = await res.json();
+
+    if (!rows.length) {
+      container.innerHTML = `<div style="text-align:center;padding:40px;color:#999">
+        <div style="font-size:48px">🎉</div>
+        <p style="margin-top:12px;font-size:16px">No pending outpass requests!</p>
+      </div>`;
+      return;
+    }
+
+    const myStageRole = getMyStageRole();
+    container.innerHTML = rows.map(r => buildOutpassCard(r, myStageRole)).join('');
+  } catch(e) {
+    container.innerHTML = `<p style="color:#c00;padding:20px">Error loading. Is backend running?</p>`;
+  }
+}
+
+function buildOutpassCard(r, myStageRole) {
+  // Attendance summary HTML
+  const attRows = (r.attendance_summary || []).map(a => {
+    const low  = a.percentage < 75;
+    const cls  = low ? 'att-low' : 'att-safe';
+    const icon = low ? '⚠️' : '✅';
+    return `<tr>
+      <td>${a.subject}</td>
+      <td class="${cls}">${icon} ${a.percentage.toFixed(1)}%</td>
+    </tr>`;
+  }).join('');
+
+  const lowCount = (r.low_attendance || []).length;
+  const attWarning = lowCount > 0
+    ? `<div style="background:#fff3e0;color:#e65100;padding:7px 10px;border-radius:6px;font-size:12px;margin-top:6px">
+        ⚠️ Student has <b>${lowCount} subject(s)</b> below 75% attendance. Consider carefully before approving.
+       </div>`
+    : `<div style="background:#e8f5e9;color:#2e7d32;padding:7px 10px;border-radius:6px;font-size:12px;margin-top:6px">
+        ✅ Student's attendance is good across all subjects.
+       </div>`;
+
+  // Stage tracker
+  const stages = [
+    { key:'faculty',      label:'Faculty Advisor',    status: r.faculty_status,       by: r.faculty_approved_by },
+    { key:'hostel_coord', label:'Hostel Coordinator',  status: r.hostel_coord_status,  by: r.hostel_coord_approved_by },
+    { key:'hod',          label:'HOD',                status: r.hod_status,           by: r.hod_approved_by },
+    { key:'warden',       label:'Hostel Warden',      status: r.warden_status,        by: r.warden_approved_by }
+  ];
+
+  const trackerHtml = `<div class="stage-tracker">` +
+    stages.map((s, i) => {
+      let cls = 'stage-box';
+      let text = s.label;
+      if (s.status === 'Approved')  { cls += ' done';     text = `✅ ${s.label}<br><small>${s.by||''}</small>`; }
+      else if (s.status === 'Rejected') { cls += ' rejected'; text = `❌ ${s.label}`; }
+      else if (s.status === 'Pending')  { cls += ' current';  text = `🔵 ${s.label}`; }
+      else                              { cls += '';           text = `⏳ ${s.label}`; }
+      return `<div class="${cls}">${text}</div>${i < stages.length-1 ? '<div class="stage-arrow">→</div>' : ''}`;
+    }).join('') +
+  `</div>`;
+
+  // Action buttons — only shown for teacher's own stage
+  const stageMap = {
+    faculty: { approveUrl: `faculty/approve`, rejectUrl: `faculty/reject`, label: 'Faculty Advisor' },
+    hostel:  { approveUrl: `hostel/approve`,  rejectUrl: `hostel/reject`,  label: 'Hostel Coordinator' },
+    hod:     { approveUrl: `hod/approve`,     rejectUrl: `hod/reject`,     label: 'HOD' },
+    warden:  { approveUrl: `warden/approve`,  rejectUrl: `warden/reject`,  label: 'Hostel Warden' }
+  };
+
+  const myStage     = stageMap[myStageRole];
+  const currentStage = r.stage; // e.g. "Faculty Advisor", "HOD", etc.
+  const stageLabels  = { faculty:'Faculty Advisor', hostel:'Hostel Coordinator', hod:'HOD', warden:'Hostel Warden' };
+  const isMyTurn     = currentStage === stageLabels[myStageRole];
+
+  let actionHtml = '';
+  if (r.overall_status === 'Approved') {
+    actionHtml = `<div style="background:#e8f5e9;border-radius:8px;padding:10px;text-align:center;font-weight:700;color:#2e7d32;margin-top:12px">
+      ✅ FULLY APPROVED — Outpass Granted!
+    </div>`;
+  } else if (r.overall_status === 'Rejected') {
+    actionHtml = `<div style="background:#fce4ec;border-radius:8px;padding:10px;text-align:center;font-weight:700;color:#c62828;margin-top:12px">
+      ❌ REJECTED — Outpass denied.
+    </div>`;
+  } else if (isMyTurn) {
+    actionHtml = `<div class="action-row">
+      <span class="stage-label">👆 Your turn: ${myStage.label}</span>
+      <button class="btn-approve" onclick="actOutpass(${r.id},'${myStage.approveUrl}')">✓ Approve</button>
+      <button class="btn-reject"  onclick="actOutpass(${r.id},'${myStage.rejectUrl}')">✗ Reject</button>
+    </div>`;
+  } else {
+    actionHtml = `<div class="action-row">
+      <span class="not-my-stage">⏳ Waiting for: <b>${currentStage}</b> — Not your stage yet</span>
+    </div>`;
+  }
+
+  const borderColor = isMyTurn ? '#f57c00' : '#764ba2';
+
+  return `<div class="op-card ${isMyTurn?'stage-me':''}" style="border-left-color:${borderColor}">
+    <div class="op-header">
+      <div>
+        <div class="op-student">${r.name}</div>
+        <div class="op-reg">${r.reg_no} &nbsp;|&nbsp; ${r.department || ''} Year ${r.year || ''} Sec ${r.section || ''}</div>
+      </div>
+      <span class="badge ${r.overall_status==='Approved'?'badge-ok':r.overall_status==='Rejected'?'badge-bad':'badge-pend'}">${r.overall_status}</span>
+    </div>
+
+    <div class="op-details">
+      📝 <b>Reason:</b> ${r.reason}<br>
+      📍 <b>Destination:</b> ${r.destination}<br>
+      🗓 <b>Out:</b> ${r.out_date} at ${r.out_time} &nbsp;&nbsp; <b>Return:</b> ${r.return_date} at ${r.return_time}
+    </div>
+
+    <!-- Student Attendance (Change 1 - teachers can see this) -->
+    <div class="att-mini">
+      <div class="att-mini-title">📊 Student's Attendance (to help your decision)</div>
+      <table>${attRows || '<tr><td colspan="2">No attendance data</td></tr>'}</table>
+    </div>
+    ${attWarning}
+
+    <!-- Stage Progress Tracker -->
+    <div style="margin-top:12px;font-size:12px;color:#666;font-weight:600;margin-bottom:4px">APPROVAL PROGRESS:</div>
+    ${trackerHtml}
+
+    <!-- Action for this teacher -->
+    ${actionHtml}
+  </div>`;
+}
+
+async function actOutpass(id, urlPart) {
+  try {
+    const res  = await fetch(`${API}/teacher/outpass/${urlPart}/${id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teacher_name: teacher.name })
+    });
+    const data = await res.json();
+    alert(data.message || 'Done!');
+    loadOutpass();
+    loadCounts();
+  } catch(e) {
+    alert('Error processing request.');
+  }
+}
+
+// ── LOCATION UPDATE ────────────────────────────────────────────────────
+async function updateLocation() {
+  const payload = {
+    teacher_id:     teacher.id,
+    status:         document.getElementById('locStatus').value,
+    location:       document.getElementById('locRoom').value,
+    available_from: document.getElementById('locFrom').value,
+    available_to:   document.getElementById('locTo').value
+  };
+  try {
+    const res = await fetch(`${API}/teacher/status/update`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    showMsg('locMsg', d.message || 'Updated!', d.success);
+  } catch { showMsg('locMsg', 'Error. Is backend running?', false); }
+}
+
+// ── ON-DUTY ────────────────────────────────────────────────────────────
+async function loadOnduty() {
+  const tbody = document.getElementById('odTable');
+  try {
+    const res  = await fetch(`${API}/teacher/onduty/pending`);
+    const rows = await res.json();
+    tbody.innerHTML = rows.length ? rows.map(r => `<tr>
+      <td><b>${r.name}</b><br><small style="color:#999">${r.reg_no}</small></td>
+      <td>${r.event_name}</td>
+      <td>${r.date}</td>
+      <td style="max-width:200px">${r.description||'—'}</td>
+      <td>
+        <button style="padding:6px 14px;background:#4caf50;color:#fff;border:none;border-radius:6px;cursor:pointer"
+          onclick="approveOnduty(${r.id})">✓ Approve</button>
+      </td>
+    </tr>`).join('') : `<tr><td colspan="5" style="text-align:center;padding:20px;color:#999">No pending on-duty requests 🎉</td></tr>`;
+  } catch { tbody.innerHTML = '<tr><td colspan="5">Error loading.</td></tr>'; }
+}
+
+async function approveOnduty(id) {
+  await fetch(`${API}/teacher/onduty/approve/${id}`, { method:'POST' });
+  loaded.onduty = false;
+  loadOnduty();
+  loadCounts();
+  alert('✅ On-Duty approved!');
+}
+
+// ── TICKETS ────────────────────────────────────────────────────────────
+async function loadTickets() {
+  const tbody = document.getElementById('ticketTable');
+  try {
+    const res  = await fetch(`${API}/teacher/helpdesk/all`);
+    const rows = await res.json();
+    tbody.innerHTML = rows.length ? rows.map(r => {
+      const cls = r.status==='Open'?'badge-pend':r.status==='Closed'?'badge-ok':'badge-warn';
+      return `<tr>
+        <td><b>${r.name}</b><br><small style="color:#999">${r.reg_no}</small></td>
+        <td>${r.category}</td>
+        <td>${r.subject}</td>
+        <td><span class="badge ${cls}">${r.status}</span></td>
+        <td>${(r.submitted_at||'').split('T')[0]||r.submitted_at||'—'}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="5" style="text-align:center;padding:20px;color:#999">No tickets yet.</td></tr>`;
+  } catch { tbody.innerHTML = '<tr><td colspan="5">Error loading.</td></tr>'; }
+}
+
+// ── UTIL ──────────────────────────────────────────────────────────────
+function showMsg(id, text, ok) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg ' + (ok?'ok':'err');
+  el.style.display = 'block';
+  setTimeout(() => el.style.display='none', 4000);
+}
+</script>
+</body>
+</html>
