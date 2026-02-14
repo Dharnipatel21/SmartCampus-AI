@@ -1,0 +1,11 @@
+teacher_id,name,email,department,designation,office_room,password,role_type,role_name
+T001,Dr. Rajesh Kumar,rajesh.kumar@srmist.edu.in,CSE,Professor & HOD,ADMIN-301,teacher123,HOD,Head of Department
+T002,Prof. Priya Sharma,priya.sharma@srmist.edu.in,CSE,Assistant Professor,CSE-201,teacher123,FACULTY_ADVISOR,Faculty Advisor
+T003,Dr. Suresh Reddy,suresh.reddy@srmist.edu.in,CSE,Associate Professor,HOSTEL-OFFICE,teacher123,WARDEN,Hostel Warden
+T004,Prof. Anita Desai,anita.desai@srmist.edu.in,ECE,Assistant Professor,ECE-102,teacher123,FACULTY_ADVISOR,Faculty Advisor
+T005,Dr. Vikram Singh,vikram.singh@srmist.edu.in,CSE,Professor,CSE-305,teacher123,HOSTEL_COORDINATOR,Hostel Coordinator
+T006,Dr. Meena Iyer,meena.iyer@srmist.edu.in,ECE,Associate Professor,ECE-205,teacher123,FACULTY_ADVISOR,Faculty Advisor
+T007,Prof. Karthik Nair,karthik.nair@srmist.edu.in,MECH,Assistant Professor,MECH-103,teacher123,FACULTY_ADVISOR,Faculty Advisor
+T008,Dr. Lakshmi Pillai,lakshmi.pillai@srmist.edu.in,IT,Professor & HOD,IT-401,teacher123,HOD,Head of Department
+T009,Prof. Arun Menon,arun.menon@srmist.edu.in,AIDS,Assistant Professor,AIDS-102,teacher123,FACULTY_ADVISOR,Faculty Advisor
+T010,Dr. Sunita Rao,sunita.rao@srmist.edu.in,CIVIL,Associate Professor,CIVIL-201,teacher123,FACULTY_ADVISOR,Faculty Advisor
