@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant - SmartCampus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .chat-container {
+            max-width: 800px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            word-wrap: break-word;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin: 0 10px;
+        }
+
+        .message.bot .message-icon {
+            background: #667eea;
+        }
+
+        .message.user .message-icon {
+            background: #764ba2;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+        }
+
+        .quick-questions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .quick-btn {
+            background: #f0f0f0;
+            border: 1px solid #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <h2>🤖 AI Assistant</h2>
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+    </nav>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Smart Campus Assistant</h2>
+            <p>Ask me anything about campus, attendance, outpass, exams, etc.</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-icon">🤖</div>
+                <div class="message-content">
+                    Hi! I'm your Smart Campus AI Assistant. I can help you with:
+                    <br>• Outpass queries
+                    <br>• Attendance information
+                    <br>• Hostel rules
+                    <br>• Exam details
+                    <br>• Fee payment
+                    <br><br>What would you like to know?
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <div class="quick-questions">
+                <button class="quick-btn" onclick="sendQuickQuestion('What is minimum attendance?')">📊
+                    Attendance</button>
+                <button class="quick-btn" onclick="sendQuickQuestion('How to request outpass?')">🚪 Outpass</button>
+                <button class="quick-btn" onclick="sendQuickQuestion('Hostel rules')">🏠 Hostel</button>
+                <button class="quick-btn" onclick="sendQuickQuestion('Exam information')">📝 Exams</button>
+            </div>
+
+            <div class="input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your question here..."
+                    onkeypress="handleKeyPress(event)">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+            const icon = document.createElement('div');
+            icon.className = 'message-icon';
+            icon.textContent = isUser ? '👤' : '🤖';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+
+            messageDiv.appendChild(icon);
+            messageDiv.appendChild(contentDiv);
+
+            // Insert before typing indicator
+            chatMessages.insertBefore(messageDiv, typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, true);
+            chatInput.value = '';
+
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const response = await fetch(`${API_URL}/chatbot`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: message })
+                });
+
+                const data = await response.json();
+
+                // Hide typing indicator
+                typingIndicator.style.display = 'none';
+
+                if (data.success) {
+                    addMessage(data.response);
+                } else {
+                    addMessage("Sorry, I couldn't process that. Please try again.");
+                }
+            } catch (error) {
+                typingIndicator.style.display = 'none';
+                addMessage("Sorry, I'm having trouble connecting. Please make sure the backend is running.");
+                console.error('Chat error:', error);
+            }
+        }
+
+        function sendQuickQuestion(question) {
+            chatInput.value = question;
+            sendMessage();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+
+</html>
