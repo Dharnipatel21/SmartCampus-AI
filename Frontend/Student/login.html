@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Login – SmartCampus AI</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;border-radius:16px;padding:40px 36px;width:400px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  .logo{text-align:center;margin-bottom:28px}
+  .logo .icon{font-size:50px}
+  .logo h2{color:#667eea;margin-top:8px;font-size:24px}
+  .logo p{color:#888;font-size:14px}
+  label{display:block;font-size:14px;font-weight:600;color:#444;margin-bottom:6px}
+  input{width:100%;padding:11px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;outline:none;transition:.2s}
+  input:focus{border-color:#667eea}
+  .grp{margin-bottom:18px}
+  .btn{width:100%;padding:13px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;transition:.2s}
+  .btn:hover{opacity:.88}
+  .err{background:#fee;color:#c00;padding:10px 14px;border-radius:8px;font-size:14px;margin-bottom:14px;display:none}
+  .demo{background:#f0f2ff;border-radius:8px;padding:14px;margin-top:20px;font-size:13px;color:#555}
+  .demo b{color:#667eea}
+  .back{text-align:center;margin-top:16px;font-size:14px}
+  .back a{color:#667eea;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="icon">👨‍🎓</div>
+    <h2>Student Login</h2>
+    <p>SmartCampus AI</p>
+  </div>
+
+  <div class="err" id="err"></div>
+
+  <form id="form">
+    <div class="grp">
+      <label>Registration Number</label>
+      <input id="reg" type="text" placeholder="e.g. RA2111003010001" required>
+    </div>
+    <div class="grp">
+      <label>Password</label>
+      <input id="pwd" type="password" placeholder="Enter your password" required>
+    </div>
+    <button class="btn" type="submit">Login</button>
+  </form>
+
+  <div class="demo">
+    <b>Demo Credentials</b><br>
+    Registration No: <b>RA2111003010001</b><br>
+    Password: <b>password123</b>
+  </div>
+
+  <div class="back"><a href="../index.html">← Back to Home</a></div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+document.getElementById('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const errDiv = document.getElementById('err');
+  errDiv.style.display = 'none';
+
+  try {
+    const res = await fetch(`${API}/student/login`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        reg_no: document.getElementById('reg').value.trim(),
+        password: document.getElementById('pwd').value.trim()
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      // Save student info so dashboard can use it
+      localStorage.setItem('student', JSON.stringify(data.student));
+      window.location.href = 'dashboard.html';
+    } else {
+      errDiv.textContent = data.message || 'Invalid credentials. Try RA2111003010001 / password123';
+      errDiv.style.display = 'block';
+    }
+  } catch {
+    errDiv.textContent = '❌ Cannot connect to server. Make sure backend is running: python app.py';
+    errDiv.style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>
