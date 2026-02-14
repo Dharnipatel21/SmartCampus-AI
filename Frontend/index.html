@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartCampus AI</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;border-radius:20px;padding:50px 40px;text-align:center;width:420px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .emoji{font-size:60px;margin-bottom:16px}
+  h1{color:#667eea;font-size:32px;margin-bottom:8px}
+  p{color:#777;margin-bottom:36px;font-size:15px}
+  .btn{display:block;padding:16px;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none;font-size:17px;font-weight:600;margin-bottom:16px;transition:.2s}
+  .btn:hover{opacity:.88;transform:translateY(-2px)}
+  .features{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}
+  .f{font-size:13px;color:#555}
+  .f::before{content:"✓ ";color:#667eea;font-weight:700}
+  footer{margin-top:28px;font-size:12px;color:#aaa}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="emoji">🎓</div>
+  <h1>SmartCampus AI</h1>
+  <p>AI-Powered Student &amp; Teacher Management System</p>
+
+  <a href="student/login.html" class="btn">👨‍🎓 Student Portal</a>
+  <a href="teacher/login.html" class="btn">👨‍🏫 Teacher Portal</a>
+
+  <div class="features">
+    <div class="f">AI Chatbot</div>
+    <div class="f">Attendance Tracker</div>
+    <div class="f">Outpass System</div>
+    <div class="f">Grade Analytics</div>
+    <div class="f">Teacher Locator</div>
+    <div class="f">Faculty Roles</div>
+    <div class="f">On-Duty Tracker</div>
+    <div class="f">Help Desk</div>
+  </div>
+  <footer>SmartCampus AI · Powered by Claude · SRM University</footer>
+</div>
+</body>
+</html>
