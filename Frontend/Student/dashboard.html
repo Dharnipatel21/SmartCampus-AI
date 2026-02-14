@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard – SmartCampus AI</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f4f6fb;color:#333}
+nav{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+nav h1{font-size:20px}
+.nav-right{display:flex;align-items:center;gap:14px;font-size:14px}
+.btn-logout{background:rgba(255,255,255,.2);border:none;color:#fff;padding:7px 16px;border-radius:6px;cursor:pointer}
+.tabs{display:flex;gap:4px;padding:16px 24px 0;overflow-x:auto;background:#fff;border-bottom:2px solid #e8eaf6}
+.tab{padding:10px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:500;color:#888;border-bottom:3px solid transparent;white-space:nowrap;transition:.2s}
+.tab.active{color:#667eea;border-bottom-color:#667eea;background:#f0f2ff;border-radius:6px 6px 0 0}
+.content{padding:24px;max-width:1200px;margin:0 auto}
+.section{display:none}.section.active{display:block}
+h2{font-size:20px;color:#444;margin-bottom:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.07);text-align:center}
+.card .num{font-size:32px;font-weight:700;color:#667eea;margin-bottom:4px}
+.card .lbl{font-size:13px;color:#888}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+th{background:#667eea;color:#fff;padding:10px 12px;text-align:center;font-size:13px}
+td{padding:9px 12px;border:1px solid #e8eaf6;font-size:13px;text-align:center;vertical-align:middle}
+td.day-col{font-weight:700;background:#f0f2ff;color:#667eea}
+.badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-ok{background:#e8f5e9;color:#2e7d32}.badge-warn{background:#fff3e0;color:#e65100}
+.badge-bad{background:#fce4ec;color:#c62828}.badge-pend{background:#e3f2fd;color:#1565c0}
+.form-box{background:#fff;border-radius:12px;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,.07);max-width:560px}
+.form-box h3{margin-bottom:18px;color:#667eea}
+.grp{margin-bottom:14px}
+.grp label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#555}
+.grp input,.grp select,.grp textarea{width:100%;padding:10px 12px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;transition:.2s}
+.grp input:focus,.grp select:focus,.grp textarea:focus{border-color:#667eea}
+.grp textarea{resize:vertical;min-height:70px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn-submit{padding:11px 28px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer}
+.msg{padding:10px 14px;border-radius:8px;font-size:14px;margin-top:12px;display:none}
+.msg.ok{background:#e8f5e9;color:#2e7d32}.msg.err{background:#fce4ec;color:#c62828}
+.tip{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px}
+
+/* TIMETABLE GRID */
+.tt-wrap{overflow-x:auto}
+.tt-table{min-width:900px}
+.tt-table th{font-size:12px;padding:8px 6px;background:#667eea;color:#fff}
+.tt-table td{font-size:12px;padding:6px 5px;min-width:80px;background:#fff}
+.tt-table td.break-cell{background:#fff8e1;color:#e65100;font-weight:600;font-size:11px;writing-mode:vertical-rl;text-orientation:mixed;text-align:center;padding:4px}
+.tt-table td.lunch-cell{background:#e8f5e9;color:#2e7d32;font-weight:600;font-size:11px;writing-mode:vertical-rl;text-orientation:mixed;text-align:center;padding:4px}
+.tt-table td.subject-cell{background:#e8eaff;border-radius:4px;line-height:1.4}
+.tt-table td.empty-cell{background:#fafafa}
+.subject-code{font-weight:700;font-size:12px;color:#3949ab}
+.teacher-code{font-size:11px;color:#666}
+
+/* AI TOOLS */
+.ai-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:28px}
+/* removed .ai-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(102,126,234,.2)}
+.ai-card-icon{font-size:40px;margin-bottom:10px}
+.ai-card-title{font-size:16px;font-weight:700;color:#333;margin-bottom:6px}
+.ai-card-desc{font-size:13px;color:#777;line-height:1.5;margin-bottom:14px}
+.ai-result.show{display:block}
+.ai-result h3{font-size:17px;color:#667eea;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.result-section{margin-bottom:18px}
+.result-section h4{font-size:14px;font-weight:700;color:#444;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f0f2ff}
+/* Prediction bars */
+.pred-bar-wrap{margin-bottom:10px}
+.pred-bar-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+.pred-bar{height:10px;border-radius:5px;background:#e8eaf6;overflow:hidden}
+.pred-bar-fill{height:100%;border-radius:5px;transition:.6s}
+.fill-safe{background:linear-gradient(90deg,#4caf50,#81c784)}
+.fill-warn{background:linear-gradient(90deg,#ff9800,#ffb74d)}
+.fill-danger{background:linear-gradient(90deg,#f44336,#ef9a9a)}
+/* Risk badge */
+.risk-low{background:#e8f5e9;color:#2e7d32;padding:6px 16px;border-radius:20px;font-weight:700;font-size:14px;display:inline-block}
+.risk-med{background:#fff3e0;color:#e65100;padding:6px 16px;border-radius:20px;font-weight:700;font-size:14px;display:inline-block}
+.risk-high{background:#fce4ec;color:#c62828;padding:6px 16px;border-radius:20px;font-weight:700;font-size:14px;display:inline-block}
+/* Study plan */
+.day-plan{background:#f8f9ff;border-radius:10px;padding:14px;margin-bottom:10px}
+.day-plan h5{color:#667eea;font-size:14px;margin-bottom:8px}
+.study-slot{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee;font-size:13px}
+.study-slot:last-child{border:none}
+.study-dur{background:#667eea;color:#fff;padding:3px 10px;border-radius:12px;font-size:12px}
+/* Performance */
+.perf-score{text-align:center;padding:20px 0}
+.perf-stars{font-size:28px;letter-spacing:4px;margin-bottom:8px}
+.perf-label{font-size:22px;font-weight:700}
+.perf-label.green{color:#2e7d32}.perf-label.blue{color:#1565c0}
+.perf-label.orange{color:#e65100}.perf-label.red{color:#c62828}
+.suggestion-item{display:flex;gap:12px;padding:10px 14px;border-radius:8px;margin-bottom:8px;font-size:13px;align-items:flex-start}
+.sug-positive{background:#e8f5e9;color:#2e7d32}
+.sug-warning{background:#fff3e0;color:#e65100}
+.sug-danger{background:#fce4ec;color:#c62828}
+.loading-spin{text-align:center;padding:30px;color:#667eea;font-size:15px}
+.qbtn{padding:5px 12px;background:#f0f2ff;color:#667eea;border:none;border-radius:20px;cursor:pointer;font-size:12px;font-weight:500;transition:.15s}
+.qbtn:hover{background:#667eea;color:#fff}
+
+/* RECOMMENDATION SYSTEM */
+.rec-subject{background:#fff;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid #667eea}
+.rec-subject.critical{border-left-color:#f44336}
+.rec-subject.needs-work{border-left-color:#ff9800}
+.rec-subject.good{border-left-color:#4caf50}
+.rec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.rec-title{font-size:16px;font-weight:700;color:#333}
+.rec-stats{display:flex;gap:10px;font-size:13px;color:#666}
+.vector-box{background:#f0f2ff;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;font-family:monospace;color:#3949ab}
+.resource-card{background:#f8f9ff;border-radius:10px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.resource-info{flex:1}
+.resource-title{font-size:14px;font-weight:700;color:#333;margin-bottom:4px}
+.resource-meta{font-size:12px;color:#777;margin-bottom:6px}
+.sim-bar{height:8px;border-radius:4px;background:#e8eaf6;overflow:hidden;width:120px;margin-top:4px}
+.sim-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#667eea,#764ba2)}
+.sim-score{font-size:12px;color:#667eea;font-weight:700}
+.resource-links{display:flex;gap:8px;flex-direction:column}
+.link-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;border:none;text-align:center}
+.link-yt{background:#ff0000;color:#fff}
+.link-search{background:#4285f4;color:#fff}
+.peer-box{background:#fff3e0;border-radius:10px;padding:14px;margin-bottom:10px;font-size:13px;color:#e65100;border-left:3px solid #ff9800}
+.strategy-box{background:linear-gradient(135deg,#667eea15,#764ba215);border:2px solid #667eea;border-radius:12px;padding:18px;margin-bottom:20px;text-align:center}
+.strategy-box h3{color:#667eea;margin-bottom:6px}
+.strategy-box p{color:#555;font-size:14px}
+.trail{background:#f8f9ff;border-radius:8px;padding:12px;margin-top:8px}
+.trail-step{padding:6px 0;border-bottom:1px solid #e8eaf6;font-size:13px;display:flex;align-items:center;gap:8px}
+.trail-step:last-child{border:none}
+.stage-badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+.stage-current{background:#e3f2fd;color:#1565c0}
+.stage-done{background:#e8f5e9;color:#2e7d32}
+.stage-wait{background:#f5f5f5;color:#999}
+.stage-reject{background:#fce4ec;color:#c62828}
+.overall-approved{background:#e8f5e9;border:2px solid #4caf50;border-radius:8px;padding:10px;text-align:center;font-weight:700;color:#2e7d32;margin-top:8px}
+.overall-rejected{background:#fce4ec;border:2px solid #f44336;border-radius:8px;padding:10px;text-align:center;font-weight:700;color:#c62828;margin-top:8px}
+</style>
+</head>
+<body>
+<nav>
+  <h1>🎓 SmartCampus AI</h1>
+  <div class="nav-right">
+    <span id="navName">Student</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="tabs" id="tabBar">
+  <button class="tab active" onclick="show('home',this)">🏠 Home</button>
+  <button class="tab" onclick="show('attendance',this)">📊 Attendance</button>
+  <button class="tab" onclick="show('marks',this)">📝 Marks</button>
+  <button class="tab" onclick="show('timetable',this)">📅 Timetable</button>
+  <button class="tab" onclick="show('exams',this)">📋 Exams</button>
+  <button class="tab" onclick="show('fees',this)">💰 Fees</button>
+  <!-- Outpass tab only shown for hostelers — see JS below -->
+  <button class="tab" id="outpassTab" style="display:none" onclick="show('outpass',this)">🚪 Outpass</button>
+  <button class="tab" onclick="show('onduty',this)">📋 On-Duty</button>
+  <button class="tab" onclick="show('helpdesk',this)">🎫 Help Desk</button>
+  <button class="tab" onclick="show('recommend',this)">🎯 Resources</button>
+  <button class="tab" onclick="show('chatbot',this)">🤖 AI Chat</button>
+</div>
+
+<div class="content">
+
+<!-- HOME -->
+<div id="home" class="section active">
+  <h2>Welcome, <span id="welcomeName">Student</span>! 👋</h2>
+  <div class="tip" style="background:#e8f0fe;color:#3949ab;margin-bottom:16px">
+    💡 Click any tab above to view your details or submit requests.
+  </div>
+  <!-- Only CGPA, Subjects, Low Attendance cards — NO fees card -->
+  <div class="cards">
+    <div class="card"><div class="num" id="scCgpa">—</div><div class="lbl">CGPA</div></div>
+    <div class="card"><div class="num" id="scSubjects">—</div><div class="lbl">Subjects</div></div>
+    <div class="card"><div class="num" id="scLow" style="color:#e53935">—</div><div class="lbl">Low Attendance</div></div>
+  </div>
+  <table>
+    <thead><tr><th style="text-align:left">Field</th><th style="text-align:left">Value</th></tr></thead>
+    <tbody id="profileTable"></tbody>
+  </table>
+</div>
+
+<!-- ATTENDANCE -->
+<div id="attendance" class="section">
+  <h2>📊 Attendance</h2>
+  <div class="tip" id="attTip">Loading...</div>
+  <table>
+    <thead><tr><th>Subject</th><th>Total</th><th>Attended</th><th>%</th><th>Status</th><th>Classes Needed for 75%</th></tr></thead>
+    <tbody id="attTable"></tbody>
+  </table>
+</div>
+
+<!-- MARKS -->
+<div id="marks" class="section">
+  <h2>📝 Marks &amp; Grades</h2>
+  <table>
+    <thead><tr><th>Subject</th><th>Internal /25</th><th>External /75</th><th>Total /100</th><th>Grade</th><th>Credits</th></tr></thead>
+    <tbody id="marksTable"></tbody>
+  </table>
+</div>
+
+<!-- TIMETABLE — Grid format matching the uploaded image -->
+<div id="timetable" class="section">
+  <h2>📅 Timetable — 2024-25 Odd Semester</h2>
+  <p style="font-size:13px;color:#666;margin-bottom:12px">Venue: ADMIN 505 &nbsp;|&nbsp; Faculty Advisor: Ms. Lakshmi</p>
+  <div class="tt-wrap">
+    <table class="tt-table" id="ttGrid">
+      <thead>
+        <tr>
+          <th style="width:60px">DAY</th>
+          <th>8.00–8.50<br><small>Period 1</small></th>
+          <th>8.50–9.40<br><small>Period 2</small></th>
+          <th style="width:40px">9.40–9.50</th>
+          <th>9.50–10.40<br><small>Period 3</small></th>
+          <th>10.40–11.30<br><small>Period 4</small></th>
+          <th style="width:40px">11.30–12.20</th>
+          <th>12.20–1.10<br><small>Period 5</small></th>
+          <th>1.10–2.00<br><small>Period 6</small></th>
+          <th>2.00–2.50<br><small>Period 7</small></th>
+          <th>2.50–3.40<br><small>Period 8</small></th>
+        </tr>
+      </thead>
+      <tbody id="ttBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EXAMS -->
+<div id="exams" class="section">
+  <h2>📋 Exam Schedule</h2>
+  <table>
+    <thead><tr><th>Subject</th><th>Date</th><th>Time</th><th>Hall</th></tr></thead>
+    <tbody id="examTable"></tbody>
+  </table>
+</div>
+
+<!-- FEES -->
+<div id="fees" class="section">
+  <h2>💰 Fee Status</h2>
+  <div class="cards" id="feeCards"></div>
+</div>
+
+<!-- OUTPASS — 4-stage flow (hostelers only) -->
+<div id="outpass" class="section">
+  <h2>🚪 Outpass Request</h2>
+  <div class="tip" style="background:#e3f2fd;color:#1565c0;margin-bottom:16px">
+    ℹ️ Outpass goes through <strong>4 stages</strong>:
+    Faculty Advisor → Hostel Coordinator → HOD → Hostel Warden.<br>
+    All 4 must approve before you can leave campus.
+  </div>
+  <div class="form-box">
+    <h3>Submit New Outpass</h3>
+    <div class="grp"><label>Reason for going out</label><input id="opReason" type="text" placeholder="e.g. Medical appointment"></div>
+    <div class="grp"><label>Destination</label><input id="opDest" type="text" placeholder="e.g. Apollo Hospital, Chennai"></div>
+    <div class="row2">
+      <div class="grp"><label>Out Date</label><input id="opOutDate" type="date"></div>
+      <div class="grp"><label>Out Time</label><input id="opOutTime" type="time"></div>
+    </div>
+    <div class="row2">
+      <div class="grp"><label>Return Date</label><input id="opRetDate" type="date"></div>
+      <div class="grp"><label>Return Time</label><input id="opRetTime" type="time"></div>
+    </div>
+    <button class="btn-submit" onclick="submitOutpass()">Submit Outpass</button>
+    <div class="msg" id="opMsg"></div>
+  </div>
+
+  <h3 style="margin:28px 0 12px">My Outpass Requests &amp; Approval Status</h3>
+  <div id="opHistory"></div>
+</div>
+
+<!-- ON-DUTY -->
+<div id="onduty" class="section">
+  <h2>📋 On-Duty Request</h2>
+  <div class="form-box">
+    <h3>Submit On-Duty</h3>
+    <div class="grp"><label>Event Name</label><input id="odEvent" type="text" placeholder="e.g. SRM Hackathon 2024"></div>
+    <div class="grp"><label>Date</label><input id="odDate" type="date"></div>
+    <div class="grp"><label>Description</label><textarea id="odDesc" placeholder="Brief description of event..."></textarea></div>
+    <button class="btn-submit" onclick="submitOnduty()">Submit Request</button>
+    <div class="msg" id="odMsg"></div>
+  </div>
+  <h3 style="margin:24px 0 12px">My On-Duty Requests</h3>
+  <table><thead><tr><th>Event</th><th>Date</th><th>Status</th></tr></thead>
+  <tbody id="odHistory"></tbody></table>
+</div>
+
+<!-- HELP DESK -->
+<div id="helpdesk" class="section">
+  <h2>🎫 Help Desk</h2>
+  <div class="form-box">
+    <h3>Raise a Ticket</h3>
+    <div class="grp">
+      <label>Category</label>
+      <select id="hdCat">
+        <option>Academic</option><option>Hostel</option><option>Transport</option>
+        <option>IT Support</option><option>Fee</option><option>Other</option>
+      </select>
+    </div>
+    <div class="grp"><label>Subject</label><input id="hdSub" type="text" placeholder="Brief subject line"></div>
+    <div class="grp"><label>Description</label><textarea id="hdDesc" placeholder="Describe your issue..."></textarea></div>
+    <button class="btn-submit" onclick="submitTicket()">Raise Ticket</button>
+    <div class="msg" id="hdMsg"></div>
+  </div>
+  <h3 style="margin:24px 0 12px">My Tickets</h3>
+  <table><thead><tr><th>Category</th><th>Subject</th><th>Status</th><th>Date</th></tr></thead>
+  <tbody id="hdHistory"></tbody></table>
+</div>
+
+<!-- AI TOOLS — 4 Features -->
+<div id="recommend" class="section">
+  <h2>🎯 AI Study Resource Recommendations</h2>
+  <div class="tip" style="background:#e8f0fe;color:#3949ab;margin-bottom:16px">
+    🤖 <b>ML Technique: Content-Based Filtering using Cosine Similarity</b><br>
+    Your marks + attendance are converted into a 5-dimension feature vector. Each resource also has a vector.
+    The AI computes the cosine angle between them — resources closest to your learning needs are recommended first.
+  </div>
+  <button onclick="loadRecommendations()" class="ai-card-btn" style="margin-bottom:20px;padding:12px 28px;font-size:15px">
+    🚀 Get My Personalised Recommendations
+  </button>
+  <div id="recContent"></div>
+</div>
+
+<div id="chatbot" class="section">
+  <h2>🤖 AI Assistant</h2>
+  <div class="tip" style="background:#e8f0fe;color:#3949ab;margin-bottom:16px">
+    🧠 Powered by <b>OpenAI GPT (LLM)</b> when API key is set — understands any question in any phrasing and uses your real data to give personalised answers.
+  </div>
+  <div style="background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.07);overflow:hidden;max-width:750px">
+    <div id="chatMessages" style="height:420px;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px">
+      <div style="background:#667eea;color:#fff;padding:12px 16px;border-radius:12px 12px 12px 0;max-width:85%;font-size:14px;line-height:1.6">
+        👋 Hi! I'm SmartCampus AI.<br>Ask me anything — attendance, marks, outpass, fees, exams, or find a teacher. I know your real data!
+      </div>
+    </div>
+    <div style="padding:8px 14px 4px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid #f0f0f0">
+      <button onclick="quickChat('Am I safe from detention?')"             class="qbtn">Am I safe?</button>
+      <button onclick="quickChat('What is my CGPA?')"                      class="qbtn">My CGPA?</button>
+      <button onclick="quickChat('How many more classes do I need?')"      class="qbtn">Classes needed?</button>
+      <button onclick="quickChat('When are my exams?')"                    class="qbtn">Exams?</button>
+      <button onclick="quickChat('How does outpass work?')"                class="qbtn">Outpass?</button>
+      <button onclick="quickChat('Where is Dr. Rajesh Kumar?')"            class="qbtn">Find teacher</button>
+      <button onclick="quickChat('What are my pending fees?')"             class="qbtn">My fees?</button>
+      <button onclick="quickChat('Give me study tips for my weak subjects')" class="qbtn">Study tips</button>
+    </div>
+    <div style="display:flex;gap:8px;padding:10px 14px 14px">
+      <input id="chatInput" type="text" placeholder="Ask anything about your academics..."
+        onkeydown="if(event.key==='Enter')sendChat()"
+        style="flex:1;padding:11px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;outline:none;transition:.2s"
+        onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e0e0e0'">
+      <button onclick="sendChat()" style="padding:11px 22px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Send ➤</button>
+    </div>
+    <div id="aiSourceLabel" style="padding:0 14px 8px;font-size:11px;color:#bbb;text-align:right"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+const API = 'http://localhost:5000/api';
+let student = null;
+const loaded = {};
+
+// TIME SLOTS matching the timetable image
+const SLOTS = [
+  '8.00-8.50','8.50-9.40','BREAK','9.50-10.40',
+  '10.40-11.30','LUNCH','12.20-1.10','1.10-2.00','2.00-2.50','2.50-3.40'
+];
+const DAYS = ['MON','TUE','WED','THU','FRI'];
+
+// ── INIT ──────────────────────────────────────────────────────────────
+window.onload = () => {
+  const stored = localStorage.getItem('student');
+  if (!stored) { window.location.href = 'login.html'; return; }
+  student = JSON.parse(stored);
+
+  document.getElementById('navName').textContent = student.name;
+  document.getElementById('welcomeName').textContent = student.name;
+
+  // CHANGE 4: Show outpass tab only for hostelers
+  if (student.is_hosteler === 1 || student.is_hosteler === true) {
+    document.getElementById('outpassTab').style.display = 'block';
+  }
+
+  loadProfile();
+  loadSummary();
+};
+
+function logout() {
+  localStorage.removeItem('student');
+  window.location.href = 'login.html';
+}
+
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (!loaded[id]) {
+    loaded[id] = true;
+    if (id==='attendance') loadAttendance();
+    if (id==='marks')      loadMarks();
+    if (id==='timetable')  loadTimetable();
+    if (id==='exams')      loadExams();
+    if (id==='fees')       loadFees();
+    if (id==='outpass')    loadOutpassHistory();
+    if (id==='onduty')     loadOndutyHistory();
+    if (id==='helpdesk')   loadTicketHistory();
+    // AI tools load on demand via their own buttons — nothing to preload
+  }
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────
+function loadProfile() {
+  const fields = [
+    ['Name',student.name],['Registration No',student.reg_no],
+    ['Department',student.department],['Year',student.year],
+    ['Semester',student.semester],['Section',student.section],
+    ['Email',student.email||'—'],['Hostel',student.hostel||'—'],
+    ['Type', student.is_hosteler ? '🏠 Hosteler' : '🏡 Day Scholar']
+  ];
+  document.getElementById('profileTable').innerHTML =
+    fields.map(([k,v])=>`<tr><td style="text-align:left;padding:10px 14px"><b>${k}</b></td><td style="text-align:left;padding:10px 14px">${v}</td></tr>`).join('');
+}
+
+async function loadSummary() {
+  try {
+    const res = await fetch(`${API}/dashboard/summary/${student.id}`);
+    const d   = await res.json();
+    document.getElementById('scCgpa').textContent     = d.cgpa || '—';
+    document.getElementById('scSubjects').textContent = d.total_subjects || 0;
+    document.getElementById('scLow').textContent      = d.low_attendance_count || 0;
+    // NOTE: No fees card on home page (Change 2)
+  } catch(e){ console.error(e); }
+}
+
+// ── ATTENDANCE ────────────────────────────────────────────────────────
+async function loadAttendance() {
+  const tbody = document.getElementById('attTable');
+  const tip   = document.getElementById('attTip');
+  try {
+    const res  = await fetch(`${API}/attendance/${student.id}`);
+    const rows = await res.json();
+    const low  = rows.filter(r => r.percentage < 75);
+    tip.textContent = low.length
+      ? `⚠️ ${low.length} subject(s) below 75%! You may be detained.`
+      : '✅ All subjects above 75% — you are safe!';
+    tip.style.background = low.length ? '#fff3e0' : '#e8f5e9';
+    tip.style.color       = low.length ? '#e65100' : '#2e7d32';
+    tbody.innerHTML = rows.map(r => {
+      const cls = r.percentage>=75?'badge-ok':r.percentage>=65?'badge-warn':'badge-bad';
+      return `<tr>
+        <td><b>${r.subject}</b></td><td>${r.total_classes}</td>
+        <td>${r.attended_classes}</td><td><b>${r.percentage.toFixed(1)}%</b></td>
+        <td><span class="badge ${cls}">${r.percentage>=75?'Safe':'Low'}</span></td>
+        <td>${r.classes_needed>0?`<b style="color:#e53935">${r.classes_needed} more</b>`:'—'}</td>
+      </tr>`;
+    }).join('');
+  } catch(e){ tbody.innerHTML='<tr><td colspan="6">Error. Is backend running?</td></tr>'; }
+}
+
+// ── MARKS ─────────────────────────────────────────────────────────────
+async function loadMarks() {
+  const tbody = document.getElementById('marksTable');
+  try {
+    const res  = await fetch(`${API}/marks/${student.id}`);
+    const rows = await res.json();
+    tbody.innerHTML = rows.map(r=>`<tr>
+      <td><b>${r.subject}</b></td><td>${r.internal_marks}</td>
+      <td>${r.external_marks}</td><td><b>${r.total_marks}</b></td>
+      <td><span class="badge badge-ok">${r.grade}</span></td><td>${r.credits}</td>
+    </tr>`).join('');
+  } catch(e){ tbody.innerHTML='<tr><td colspan="6">Error loading.</td></tr>'; }
+}
+
+// ── TIMETABLE — Grid format (Change 3) ────────────────────────────────
+async function loadTimetable() {
+  const tbody = document.getElementById('ttBody');
+  try {
+    const res  = await fetch(`${API}/timetable/${student.id}`);
+    const data = await res.json();
+
+    // Build lookup: day → slot → {subject, teacher}
+    const lookup = {};
+    DAYS.forEach(d => { lookup[d] = {}; });
+    data.forEach(r => {
+      if (lookup[r.day]) lookup[r.day][r.time_slot] = r;
+    });
+
+    tbody.innerHTML = DAYS.map(day => {
+      const cells = SLOTS.map(slot => {
+        if (slot === 'BREAK')
+          return `<td class="break-cell" rowspan="1">B<br>R<br>E<br>A<br>K</td>`;
+        if (slot === 'LUNCH')
+          return `<td class="lunch-cell" rowspan="1">L<br>U<br>N<br>C<br>H</td>`;
+        const entry = lookup[day][slot];
+        if (entry)
+          return `<td class="subject-cell">
+            <div class="subject-code">${entry.subject}</div>
+            <div class="teacher-code">${entry.teacher_name.split(' ').pop()}</div>
+          </td>`;
+        return `<td class="empty-cell"></td>`;
+      }).join('');
+      return `<tr><td class="day-col">${day}</td>${cells}</tr>`;
+    }).join('');
+  } catch(e){ tbody.innerHTML=`<tr><td colspan="11">Error loading timetable.</td></tr>`; }
+}
+
+// ── EXAMS ─────────────────────────────────────────────────────────────
+async function loadExams() {
+  const tbody = document.getElementById('examTable');
+  try {
+    const res  = await fetch(`${API}/exam-schedule/${student.semester}`);
+    const rows = await res.json();
+    tbody.innerHTML = rows.map(r=>`<tr>
+      <td><b>${r.subject}</b></td><td>${r.exam_date}</td>
+      <td>${r.time}</td><td>${r.hall}</td>
+    </tr>`).join('');
+  } catch(e){ tbody.innerHTML='<tr><td colspan="4">Error loading.</td></tr>'; }
+}
+
+// ── FEES ──────────────────────────────────────────────────────────────
+async function loadFees() {
+  const div = document.getElementById('feeCards');
+  try {
+    const res = await fetch(`${API}/fees/${student.id}`);
+    const f   = await res.json();
+    if (!f || !f.total_fee) { div.innerHTML='<p>No fee data found.</p>'; return; }
+    const cls = f.status==='Paid'?'badge-ok':f.status==='Partial'?'badge-warn':'badge-bad';
+    div.innerHTML = `
+      <div class="card"><div class="num">₹${f.total_fee.toLocaleString()}</div><div class="lbl">Total Fee</div></div>
+      <div class="card"><div class="num" style="color:#2e7d32">₹${f.paid_amount.toLocaleString()}</div><div class="lbl">Paid</div></div>
+      <div class="card"><div class="num" style="color:#e53935">₹${f.pending_amount.toLocaleString()}</div><div class="lbl">Pending</div></div>
+      <div class="card"><div class="num" style="font-size:18px"><span class="badge ${cls}">${f.status}</span></div><div class="lbl">Due: ${f.due_date}</div></div>`;
+  } catch(e){ div.innerHTML='<p>Error loading.</p>'; }
+}
+
+// ── OUTPASS — 4-stage trail (Change 1) ────────────────────────────────
+async function submitOutpass() {
+  const payload = {
+    student_id:  student.id,
+    reason:      document.getElementById('opReason').value,
+    destination: document.getElementById('opDest').value,
+    out_date:    document.getElementById('opOutDate').value,
+    out_time:    document.getElementById('opOutTime').value,
+    return_date: document.getElementById('opRetDate').value,
+    return_time: document.getElementById('opRetTime').value
+  };
+  if (!payload.reason || !payload.destination || !payload.out_date) {
+    showMsg('opMsg','Please fill all fields!',false); return;
+  }
+  try {
+    const res = await fetch(`${API}/outpass/submit`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    const d = await res.json();
+    showMsg('opMsg',d.message,d.success);
+    if (d.success) { loaded.outpass=false; loadOutpassHistory(); }
+  } catch{ showMsg('opMsg','Error. Is backend running?',false); }
+}
+
+async function loadOutpassHistory() {
+  const div = document.getElementById('opHistory');
+  try {
+    const res  = await fetch(`${API}/outpass/student/${student.id}`);
+    const rows = await res.json();
+    if (!rows.length) { div.innerHTML='<p style="color:#999">No outpass requests yet.</p>'; return; }
+
+    div.innerHTML = rows.map(r => {
+      // Overall status banner
+      let banner = '';
+      if (r.overall_status === 'Approved')
+        banner = `<div class="overall-approved">✅ FULLY APPROVED — Outpass Granted!</div>`;
+      else if (r.overall_status === 'Rejected')
+        banner = `<div class="overall-rejected">❌ REJECTED — Contact your faculty.</div>`;
+
+      // Trail steps
+      const trail = (r.approval_trail || []).map(step => {
+        const icon = step.startsWith('✅') ? 'stage-done'
+                   : step.startsWith('❌') ? 'stage-reject'
+                   : 'stage-wait';
+        return `<div class="trail-step"><span class="stage-badge ${icon}">${step}</span></div>`;
+      }).join('');
+
+      return `<div style="background:#fff;border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.07)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b>${r.reason}</b>
+          <span class="badge ${r.overall_status==='Approved'?'badge-ok':r.overall_status==='Rejected'?'badge-bad':'badge-pend'}">${r.overall_status}</span>
+        </div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px">
+          📍 ${r.destination} &nbsp;|&nbsp; 🗓 ${r.out_date} ${r.out_time} → ${r.return_date} ${r.return_time}
+        </div>
+        <div style="font-size:12px;color:#888;margin-bottom:8px">Current Stage: <b>${r.current_stage}</b></div>
+        <div class="trail">${trail}</div>
+        ${banner}
+      </div>`;
+    }).join('');
+  } catch(e){ div.innerHTML='<p>Error loading.</p>'; }
+}
+
+// ── ON-DUTY ───────────────────────────────────────────────────────────
+async function submitOnduty() {
+  const payload = {student_id:student.id,event_name:document.getElementById('odEvent').value,
+    date:document.getElementById('odDate').value,description:document.getElementById('odDesc').value};
+  if (!payload.event_name||!payload.date){showMsg('odMsg','Fill event and date!',false);return;}
+  try {
+    const res = await fetch(`${API}/onduty/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d = await res.json();
+    showMsg('odMsg',d.message,d.success);
+    if(d.success){loaded.onduty=false;loadOndutyHistory();}
+  } catch{showMsg('odMsg','Error.',false);}
+}
+
+async function loadOndutyHistory() {
+  const tbody = document.getElementById('odHistory');
+  try {
+    const res  = await fetch(`${API}/onduty/student/${student.id}`);
+    const rows = await res.json();
+    tbody.innerHTML = rows.length ? rows.map(r=>{
+      const cls=r.status==='Approved'?'badge-ok':r.status==='Rejected'?'badge-bad':'badge-pend';
+      return `<tr><td>${r.event_name}</td><td>${r.date}</td><td><span class="badge ${cls}">${r.status}</span></td></tr>`;
+    }).join('') : '<tr><td colspan="3">No requests yet.</td></tr>';
+  } catch{}
+}
+
+// ── HELP DESK ─────────────────────────────────────────────────────────
+async function submitTicket() {
+  const payload = {student_id:student.id,category:document.getElementById('hdCat').value,
+    subject:document.getElementById('hdSub').value,description:document.getElementById('hdDesc').value};
+  if (!payload.subject||!payload.description){showMsg('hdMsg','Fill all fields!',false);return;}
+  try {
+    const res = await fetch(`${API}/helpdesk/submit`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d = await res.json();
+    showMsg('hdMsg',d.message,d.success);
+    if(d.success){loaded.helpdesk=false;loadTicketHistory();}
+  } catch{showMsg('hdMsg','Error.',false);}
+}
+
+async function loadTicketHistory() {
+  const tbody = document.getElementById('hdHistory');
+  try {
+    const res  = await fetch(`${API}/helpdesk/student/${student.id}`);
+    const rows = await res.json();
+    tbody.innerHTML = rows.length ? rows.map(r=>{
+      const cls=r.status==='Open'?'badge-pend':r.status==='Closed'?'badge-ok':'badge-warn';
+      return `<tr><td>${r.category}</td><td>${r.subject}</td><td><span class="badge ${cls}">${r.status}</span></td><td>${(r.submitted_at||'').split('T')[0]||r.submitted_at||'—'}</td></tr>`;
+    }).join('') : '<tr><td colspan="4">No tickets yet.</td></tr>';
+  } catch{}
+}
+
+// ── CHATBOT ───────────────────────────────────────────────────────────
+// ── CHATBOT — with conversation history ───────────────────────────────
+let chatHistory = [];   // stores {role, content} for multi-turn memory
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg   = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+
+  appendChat(msg, 'user');
+  chatHistory.push({role:'user', content:msg});
+
+  const typingId = 'typing_' + Date.now();
+  appendChat('⏳ Thinking...', 'bot', typingId);
+
+  try {
+    const res = await fetch(`${API}/chatbot`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        message:    msg,
+        student_id: student.id,
+        history:    chatHistory.slice(-8)   // last 8 messages = memory
+      })
+    });
+    const d = await res.json();
+    document.getElementById(typingId)?.remove();
+    appendChat(d.response, 'bot');
+    chatHistory.push({role:'assistant', content: d.response});
+
+    // Show source label
+    const lbl = document.getElementById('aiSourceLabel');
+    if (lbl) {
+      lbl.textContent = d.source === 'openai_gpt'
+        ? '⚡ Answered by OpenAI GPT (LLM)'
+        : '🔧 Answered by rule-based engine';
+    }
+  } catch {
+    document.getElementById(typingId)?.remove();
+    appendChat('❌ Cannot reach server. Is the backend running?', 'bot');
+  }
+}
+
+function quickChat(q) {
+  document.getElementById('chatInput').value = q;
+  sendChat();
+}
+
+function appendChat(text, who, id) {
+  const box = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  if (id) div.id = id;
+  const isUser = who === 'user';
+  div.style.cssText = `
+    max-width:85%;padding:12px 16px;line-height:1.6;
+    border-radius:${isUser ? '12px 12px 0 12px' : '12px 12px 12px 0'};
+    font-size:14px;white-space:pre-wrap;
+    align-self:${isUser ? 'flex-end' : 'flex-start'};
+    background:${isUser ? 'linear-gradient(135deg,#667eea,#764ba2)' : '#f0f2ff'};
+    color:${isUser ? '#fff' : '#333'};
+  `;
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── AI TOOLS ──────────────────────────────────────────────────────────
+
+// Helper: show a result panel
+function showResult(id) {
+  document.querySelectorAll('.ai-result').forEach(r => r.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+  document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+
+// ── 2. OUTPASS RISK CHECKER ───────────────────────────────────────────
+function showOutpassRisk() {
+  document.getElementById('outpassRiskContent').innerHTML = '';
+  showResult('resultOutpass');
+}
+
+async function checkOutpassRisk() {
+  const reason = document.getElementById('riskReason').value;
+  const dest   = document.getElementById('riskDest').value;
+  const date   = document.getElementById('riskDate').value;
+  const time   = document.getElementById('riskTime').value;
+  if (!reason || !dest || !date) {
+    document.getElementById('outpassRiskContent').innerHTML =
+      '<p style="color:#c00;font-size:13px">⚠️ Please fill reason, destination and date!</p>';
+    return;
+  }
+  const content = document.getElementById('outpassRiskContent');
+  content.innerHTML = '<div class="loading-spin">⏳ Checking risk...</div>';
+  try {
+    const res  = await fetch(`${API}/ai/outpass-risk`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({student_id:student.id, reason, destination:dest, date, time})
+    });
+    const data = await res.json();
+
+    const riskClass = data.risk_level==='LOW'||data.risk_level==='Low' ? 'risk-low' : data.risk_level==='MEDIUM'||data.risk_level==='Moderate' ? 'risk-med' : 'risk-high';
+    const riskIcon  = data.risk_level==='LOW'||data.risk_level==='Low' ? '✅' : data.risk_level==='MEDIUM'||data.risk_level==='Moderate' ? '⚠️' : '❌';
+    const isLow     = data.risk_level==='LOW'||data.risk_level==='Low';
+    const isHigh    = data.risk_level==='HIGH'||data.risk_level==='High';
+
+    // Backend returns attendance as separate call — show simple summary
+    const attWarning = data.risk_factors && data.risk_factors.length
+      ? data.risk_factors.map(f=>`<div style="color:#e65100;font-size:13px">⚠️ ${f}</div>`).join('')
+      : '';
+    const positives = data.positive_factors && data.positive_factors.length
+      ? data.positive_factors.map(f=>`<div style="color:#2e7d32;font-size:13px">✅ ${f}</div>`).join('')
+      : '';
+
+    content.innerHTML = `
+      <div class="result-section">
+        <h4>Risk Assessment</h4>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+          <span class="${riskClass}">${riskIcon} ${data.risk_level||''} RISK</span>
+          <span style="font-size:14px;color:#555">${data.recommendation||''}</span>
+        </div>
+        <div style="background:#f8f9ff;padding:12px;border-radius:8px;font-size:13px;margin-bottom:10px">
+          <b>Risk Score: ${data.risk_score||0}/10</b> &nbsp;|&nbsp; AI Decision: <b>${data.decision||''}</b>
+        </div>
+        ${attWarning ? `<div class="result-section"><h4>⚠️ Risk Factors</h4>${attWarning}</div>` : ''}
+        ${positives  ? `<div class="result-section"><h4>✅ Positive Factors</h4>${positives}</div>`  : ''}
+      </div>
+      <div style="margin-top:12px">
+        ${isLow
+          ? '<div style="background:#e8f5e9;border-radius:8px;padding:12px;color:#2e7d32;font-size:13px">✅ Safe to apply! Go ahead and submit your outpass from the Outpass tab.</div>'
+          : !isHigh
+          ? '<div style="background:#fff3e0;border-radius:8px;padding:12px;color:#e65100;font-size:13px">⚠️ Think carefully before applying. Some subjects are close to 75%.</div>'
+          : '<div style="background:#fce4ec;border-radius:8px;padding:12px;color:#c62828;font-size:13px">❌ HIGH RISK! Going out now may cause detention. Consider postponing.</div>'}
+      </div>`;
+  } catch(e) {
+    content.innerHTML = '<p style="color:#c00">Error. Is backend running?</p>';
+  }
+}
+
+
+
+
+// ── RECOMMENDATION SYSTEM (Cosine Similarity ML) ─────────────────────
+async function loadRecommendations() {
+  const content = document.getElementById('recContent');
+  content.innerHTML = '<div class="loading-spin">🤖 Running Cosine Similarity algorithm on your data...</div>';
+  try {
+    const res  = await fetch(`${API}/ai/recommendations/${student.id}`);
+    const data = await res.json();
+    if (!res.ok || data.error) { content.innerHTML = `<div class="tip" style="background:#fff3e0;color:#e65100">⚠️ ${data.error || 'No marks data found. Run add_data.py first!'}</div>`; return; }
+
+    let html = `
+      <div class="strategy-box">
+        <h3>📌 Your Learning Strategy: ${data.focus_area}</h3>
+        <p>${data.learning_strategy}</p>
+        <div style="display:flex;justify-content:center;gap:20px;margin-top:12px;flex-wrap:wrap">
+          <span style="font-size:13px;color:#667eea">📚 ${data.total_subjects} Subjects</span>
+          <span style="font-size:13px;color:#e53935">⚠️ ${data.weak_subjects_count} Need Attention</span>
+          <span style="font-size:13px;color:#555">📊 Avg Marks: ${data.average_marks}/100</span>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:#888">ML: ${data.ml_technique}</div>
+      </div>`;
+
+    if (data.peer_insights && data.peer_insights.length) {
+      html += `<h3 style="margin-bottom:10px;color:#444">👥 Peer Insights (Collaborative Filtering)</h3>`;
+      data.peer_insights.forEach(p => { html += `<div class="peer-box">👥 ${p.message}</div>`; });
+    }
+
+    html += `<h3 style="margin:20px 0 12px;color:#444">📚 Subject Recommendations (by Cosine Similarity)</h3>`;
+
+    (data.recommendations || []).forEach(rec => {
+      const borderClass = rec.marks < 55 ? 'critical' : rec.marks < 75 ? 'needs-work' : 'good';
+      const statusIcon  = rec.marks < 55 ? '🔴' : rec.marks < 75 ? '🟡' : '🟢';
+      const vec  = rec.student_vector || [];
+      const dims = data.vector_dimensions || [];
+      const vecDisplay = dims.map((d,i) =>
+        `<span style="margin-right:8px">${d.replace(/_/g,' ')}: <b>${vec[i]||0}</b></span>`
+      ).join('');
+
+      html += `<div class="rec-subject ${borderClass}">
+        <div class="rec-header">
+          <div class="rec-title">${statusIcon} ${rec.subject}</div>
+          <div class="rec-stats">
+            <span>Marks: <b>${rec.marks}/100</b></span>
+            <span>Grade: <b>${rec.grade}</b></span>
+            <span>Attendance: <b>${rec.attendance}%</b></span>
+          </div>
+        </div>
+        <div class="vector-box">🔢 ML Feature Vector: [ ${vecDisplay} ]</div>`;
+
+      (rec.top_resources || []).forEach(r => {
+        const pct = Math.round((r.similarity_score||0)*100);
+        html += `<div class="resource-card">
+          <div class="resource-info">
+            <div class="resource-title">${r.title}</div>
+            <div class="resource-meta">📺 ${r.channel} | ${r.type} |
+              <span style="color:${r.difficulty==='Beginner'?'#2e7d32':r.difficulty==='Intermediate'?'#e65100':'#c62828'}">${r.difficulty}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              <span class="sim-score">Similarity: ${pct}%</span>
+              <div class="sim-bar"><div class="sim-fill" style="width:${pct}%"></div></div>
+              <span style="font-size:11px;color:#667eea">${r.match_level}</span>
+            </div>
+          </div>
+          <div class="resource-links">
+            ${r.youtube_url ? `<a href="${r.youtube_url}" target="_blank" class="link-btn link-yt">▶ YouTube</a>` : ''}
+            <a href="${r.search_url}" target="_blank" class="link-btn link-search">🔍 Search</a>
+          </div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+
+    content.innerHTML = html;
+  } catch(e) {
+    content.innerHTML = '<p style="color:#c00;padding:20px">Error. Is backend running?</p>';
+  }
+}
+
+function showMsg(id,text,ok){
+  const el=document.getElementById(id);
+  el.textContent=text;el.className='msg '+(ok?'ok':'err');el.style.display='block';
+  setTimeout(()=>el.style.display='none',4000);
+}
+</script>
+</body>
+</html>
